@@ -11,9 +11,9 @@ const std::wstring APP_VERSION = THIS_APP_VERSION;
 const std::wstring APP_URL_WEBSITE = L"https://github.com/Inklay/";
 
 #if _DEBUG
-const std::wstring APP_URL_BASE = L"http://localhost:8080/SyncHelper/app/";
+const std::wstring APP_URL_BASE = L"http://localhost:80/SyncHelper/app/";
 #else
-const std::wstring APP_URL_BASE = L"http://webservices-env.eba-nh6hq243.us-east-1.elasticbeanstalk.com/SyncHelper/app/";
+const std::wstring APP_URL_BASE = L"https://inklay.net/SyncHelper/app/";
 #endif
 
 const std::wstring APP_URL_CHECK_VERSION = APP_URL_BASE + "check_version?v=" + APP_VERSION;
