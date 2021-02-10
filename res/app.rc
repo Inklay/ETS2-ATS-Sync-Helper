@@ -59,8 +59,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 5,8,2,0
- PRODUCTVERSION 5,8,2,0
+ FILEVERSION 5,9,0,0
+ PRODUCTVERSION 5,9,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x3L
@@ -77,7 +77,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Inklay"
             VALUE "FileDescription", "ETS2&ATS Sync Helper"
-            VALUE "FileVersion", "5.8.2"
+            VALUE "FileVersion", "5.9.0"
             VALUE "InternalName", "ETS2-ATS-Sync-Helper"
             VALUE "LegalCopyright", "© Copyright 2020 Inklay, forked from David Santos's project"
             VALUE "OriginalFilename", "ETS2_ATS_Sync_Helper.exe"

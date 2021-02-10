@@ -22,7 +22,8 @@ public:
 
 private:
 	enum ids {
-		ID_OPEN_WEBSITE = wxID_HIGHEST + 1
+		ID_OPEN_WEBSITE = wxID_HIGHEST + 1,
+		ID_DARK_MODE = ID_OPEN_WEBSITE + 1
 	};
 	// How long to wait after a FileSystemWatcher event before re-reading the game folder
 	static const int FSTIMER_DELAY = 2000;
