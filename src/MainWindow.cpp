@@ -18,12 +18,8 @@ MainWindow::MainWindow(const wxString& title)
 	helpMenu->Append(wxID_ABOUT, "About…");
 	Bind(wxEVT_MENU, [this](wxCommandEvent&) { onAbout(); }, wxID_ABOUT);
 
-	wxMenu* settingsMenu = new wxMenu;
-	settingsMenu->AppendCheckItem(ID_DARK_MODE, "Dark mode");
-
 	wxMenuBar * menuBar = new wxMenuBar;
 	menuBar->Append(helpMenu, "Help");
-	menuBar->Append(settingsMenu, "Settings");
 
 	SetMenuBar(menuBar);
 
