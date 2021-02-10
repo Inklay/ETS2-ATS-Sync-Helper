@@ -1,7 +1,9 @@
 # ETS2&ATS Sync Helper
 
+# Toutes les personnes qui utilisent des versions inférieur à la version 5.8.2 DOIVENT télécharger la dernière version. Merci de ne pas créer d'issue si vous avez un problème avec le server et que vous n'utilisez pas la 5.8.2
+
 ## Support d'ETS2: version 1.39 et tous les DLCs.
-## Support d'ATS: version 1.39 et tous les DLCs. (en pre release)
+## Support d'ATS: version 1.39 et tous les DLCs.
 * [English version](README.md)
 
 [LICENSE](LICENSE.md)
