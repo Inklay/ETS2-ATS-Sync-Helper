@@ -53,6 +53,10 @@ DlcSelector::DlcSelector(wxWindow * parent, wxWindowID id)
 	vec->push_back(cb);
 	mDlcByCheckbox[cb] = L"?";
 
+	cb = new wxCheckBox(this, wxID_ANY, "Heart of Russia");
+	vec->push_back(cb);
+	mDlcByCheckbox[cb] = L"?";
+
 	vec = &mCheckboxesByGame[Ets2::Game::ATS];
 	cb = new wxCheckBox(this, wxID_ANY, "New Mexico");
 	vec->push_back(cb);
@@ -87,6 +91,10 @@ DlcSelector::DlcSelector(wxWindow * parent, wxWindowID id)
 	mDlcByCheckbox[cb] = L"colorado";
 
 	cb = new wxCheckBox(this, wxID_ANY, "Wyoming");
+	vec->push_back(cb);
+	mDlcByCheckbox[cb] = L"?";
+
+	cb = new wxCheckBox(this, wxID_ANY, "Texas");
 	vec->push_back(cb);
 	mDlcByCheckbox[cb] = L"?";
 
