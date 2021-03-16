@@ -1,7 +1,5 @@
 # ETS2&ATS Sync Helper
 
-# People using version prior to 5.8.2 NEEDS to update to version 5.8.2 or later, please do not create issue if you have any problem with the server while using anything else than 5.8.2
-
 ## ETS2 support: version 1.39 and all DLCs.
 ## ATS support: version 1.39 and all DLCS.
 
