@@ -28,13 +28,14 @@ namespace Ets2 {
 			NOT_FOUND = -2
 		};
 
-		static std::wstring getDefaultDirectory(Game game);
+		static std::wstring getDefaultDirectory(Game game, bool isSteam = false);
 
-		Info(Game game, const std::wstring directory);
+		Info(Game game, const std::wstring directory, const std::wstring steamDirectory);
 		Info(Info& info);
 
 		bool isValid();
 		std::wstring getDirectory();
+		std::wstring getSteamDirectory();
 		std::wstring getConfigFileName();
 		Game getGame() const;
 		SaveFormat getSaveFormat();
@@ -47,6 +48,7 @@ namespace Ets2 {
 
 		bool mIsValid;
 		std::wstring mDirectory;
+		std::wstring mSteamDirectory;
 		std::wstring mConfigFileName;
 		Game mGame;
 		ProfileList mProfiles;

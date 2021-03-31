@@ -34,6 +34,7 @@ MainWindow::MainWindow(const wxString& title)
 
 	mGameSettingsPanel = new GameSettingsPanel(panel, wxID_ANY);
 	mGameSettingsPanel->Bind(EVT_CONFIG_DIR_CHANGED, [this](wxCommandEvent&) { onConfigDirChanged(); });
+	mGameSettingsPanel->Bind(EVT_STEAM_DIR_CHANGED, [this](wxCommandEvent&) { onSteamDirChanged(); });
 	mEts2Children.push_back(mGameSettingsPanel);
 	mainSizer->Add(mGameSettingsPanel, wxSizerFlags().Expand());
 
@@ -102,7 +103,7 @@ MainWindow::MainWindow(const wxString& title)
 	mFSTimer->SetOwner(this);
 	Bind(wxEVT_TIMER, [this](wxTimerEvent&) { onFileSystemTimer(); }, mFSTimer->GetId());
 
-	updateEts2Info(Ets2::Info::getDefaultDirectory(mGameSettingsPanel->getGame()));
+	updateEts2Info(Ets2::Info::getDefaultDirectory(mGameSettingsPanel->getGame()), Ets2::Info::getDefaultDirectory(mGameSettingsPanel->getGame(), true));
 
 #if false // if working on the About window
 	// Just show the About window, then quit
@@ -118,9 +119,9 @@ MainWindow::~MainWindow() {
 	wxDELETE(mAboutWindow);
 }
 
-void MainWindow::updateEts2Info(std::wstring directory) {
+void MainWindow::updateEts2Info(std::wstring directory, std::wstring steamDirectory) {
 	wxDELETE(mEts2Info);
-	mEts2Info = new Ets2::Info(mGameSettingsPanel->getGame(), directory);
+	mEts2Info = new Ets2::Info(mGameSettingsPanel->getGame(), directory, steamDirectory);
 
 	mFSTimer->Stop();
 	wxDELETE(mFSWatcher);
@@ -149,7 +150,11 @@ void MainWindow::onAbout() {
 }
 
 void MainWindow::onConfigDirChanged() {
-	updateEts2Info(mGameSettingsPanel->getDirectory().ToStdWstring());
+	updateEts2Info(mGameSettingsPanel->getDirectory().ToStdWstring(), mGameSettingsPanel->getDirectory(GameSettingsPanel::DirId::STEAM).ToStdWstring());
+}
+
+void MainWindow::onSteamDirChanged() {
+	updateEts2Info(mGameSettingsPanel->getDirectory().ToStdWstring(), mGameSettingsPanel->getDirectory(GameSettingsPanel::DirId::STEAM).ToStdWstring());
 }
 
 void MainWindow::onFileSystemWatcher() {
@@ -160,7 +165,7 @@ void MainWindow::onFileSystemWatcher() {
 
 void MainWindow::onFileSystemTimer() {
 	DEBUG_LOG(L"Got file system timer event. Reloading Ets2::Info.");
-	updateEts2Info(mEts2Info->getDirectory());
+	updateEts2Info(mEts2Info->getDirectory(), Ets2::Info::getDefaultDirectory(mGameSettingsPanel->getGame(), true));
 	Enable();
 }
 
@@ -214,7 +219,7 @@ void MainWindow::onSync() {
 	wxDELETE(mFSWatcher);
 	mSyncDialog = new SyncDialog(this, getSelectedSave(), mDlcSelector->getDlcs(), JobSyncer::SyncType::SYNC, mJobListSelector->getJobList());
 	wxDELETE(mSyncDialog);
-	updateEts2Info(mEts2Info->getDirectory());
+	updateEts2Info(mEts2Info->getDirectory(), Ets2::Info::getDefaultDirectory(mGameSettingsPanel->getGame(), true));
 }
 
 void MainWindow::onClearJobs() {
@@ -222,7 +227,7 @@ void MainWindow::onClearJobs() {
 	wxDELETE(mFSWatcher);
 	mSyncDialog = new SyncDialog(this, getSelectedSave(), mDlcSelector->getDlcs(), JobSyncer::SyncType::CLEAR, -1);
 	wxDELETE(mSyncDialog);
-	updateEts2Info(mEts2Info->getDirectory());
+	updateEts2Info(mEts2Info->getDirectory(), Ets2::Info::getDefaultDirectory(mGameSettingsPanel->getGame(), true));
 }
 
 void MainWindow::onResetEconomy() {
@@ -230,5 +235,5 @@ void MainWindow::onResetEconomy() {
 	wxDELETE(mFSWatcher);
 	mSyncDialog = new SyncDialog(this, getSelectedSave(), mDlcSelector->getDlcs(), JobSyncer::SyncType::RESET_ECONOMY, -1);
 	wxDELETE(mSyncDialog);
-	updateEts2Info(mEts2Info->getDirectory());
+	updateEts2Info(mEts2Info->getDirectory(), Ets2::Info::getDefaultDirectory(mGameSettingsPanel->getGame(), true));
 }

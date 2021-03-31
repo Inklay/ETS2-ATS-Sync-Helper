@@ -1,6 +1,5 @@
 #include "precomp.hpp"
 #include "Ets2SyncHelperApp.hpp"
-
 #include "version.hpp"
 #include "MainWindow.hpp"
 

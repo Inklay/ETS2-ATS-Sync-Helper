@@ -46,9 +46,10 @@ private:
 	const Ets2::Profile * getSelectedProfile() const;
 	const Ets2::Save * getSelectedSave() const;
 
-	void updateEts2Info(std::wstring directory);
+	void updateEts2Info(std::wstring directory, std::wstring steamDirectory);
 	void onAbout();
 	void onConfigDirChanged();
+	void onSteamDirChanged();
 	void onFileSystemWatcher();
 	void onFileSystemTimer();
 	void onProfileChanged();

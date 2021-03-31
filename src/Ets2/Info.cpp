@@ -11,20 +11,30 @@
 namespace Ets2 {
 	const std::string Info::SAVE_FORMAT_VAR_NAME = "g_save_format";
 
-	std::wstring Info::getDefaultDirectory(Game game) {
-		wxStandardPaths standardPaths = wxStandardPaths::Get();
-		return std::wstring(standardPaths.GetDocumentsDir().Append(game == Game::ATS ? L"\\American Truck Simulator" : L"\\Euro Truck Simulator 2"));
+	std::wstring Info::getDefaultDirectory(Game game, bool isSteam) {
+		if (!isSteam)
+		{
+			wxStandardPaths standardPaths = wxStandardPaths::Get();
+			return std::wstring(standardPaths.GetDocumentsDir().Append(game == Game::ATS ? L"\\American Truck Simulator" : L"\\Euro Truck Simulator 2"));
+		}
+		else
+		{
+			return L"C:\\Program Files (x86)\\Steam";
+		}
 	}
 
-	Info::Info(Game game, const std::wstring directory) {
+	Info::Info(Game game, const std::wstring directory, const std::wstring steamDirectory) :
+		mGame(game),
+		mDirectory(directory),
+		mSteamDirectory(steamDirectory)
+	{
 		wxStopWatch initTime;
-		mDirectory = directory;
-		mGame = game;
 		mProfiles = ProfileList();
 
 		wxFileName configFileName(mDirectory + L"\\config.cfg");
 		wxDir profilesDir(mDirectory + L"\\profiles\\");
-		mIsValid = configFileName.Exists() && profilesDir.IsOpened();
+		wxDir steamProfilesDir(mSteamDirectory + L"\\userdata\\");
+		mIsValid = configFileName.Exists() && profilesDir.IsOpened() && steamProfilesDir.IsOpened();
 		if (!mIsValid) {
 			return;
 		}
@@ -47,12 +57,46 @@ namespace Ets2 {
 			}
 			fileFound = profilesDir.GetNext(&profileDir);
 		}
+#if _DEBUG
+		wxString steamPofileDir;
+		bool steamProfileFound = steamProfilesDir.GetFirst(&steamPofileDir, L"*", wxDIR_DIRS);
+		while (steamProfileFound) {
+			if (steamPofileDir != "ac")
+			{
+				wxString remoteProfileDirPath = steamProfilesDir.GetNameWithSep() + steamPofileDir;
+				if (mGame == Ets2::Game::ETS2)
+				{
+					remoteProfileDirPath += "\\227300";
+				}
+				else
+				{
+					remoteProfileDirPath += "\\270880";
+				}
+				DEBUG_LOG(remoteProfileDirPath);
+				wxDir remoteProfileDir(remoteProfileDirPath + "\\remote\\profiles");
+				DEBUG_LOG(remoteProfileDirPath);
+				fileFound = remoteProfileDir.GetFirst(&profileDir, L"*", wxDIR_DIRS);
+				while (fileFound) {
+					
+					Profile* profile = new Profile((remoteProfileDir.GetNameWithSep() + profileDir).ToStdWstring());
+					if (profile->isValid() && profile->getGame() == mGame) {
+						mProfiles.push_back(profile);
+					}
+					else {
+						delete profile;
+					}
+					fileFound = remoteProfileDir.GetNext(&profileDir);
+				}
+			}
+			steamProfileFound = steamProfilesDir.GetNext(&steamPofileDir);
+		}
+#endif
 		mProfiles.sort();
 		DEBUG_LOG(L"%s: initialized in %lld µs", mDirectory, initTime.TimeInMicro());
 	}
 
 	Info::Info(Info& info) {
-		Info::Info(info.getGame(), info.getDirectory());
+		Info::Info(info.getGame(), info.getDirectory(), info.getSteamDirectory());
 	}
 
 	bool Info::isValid() {
@@ -61,6 +105,10 @@ namespace Ets2 {
 
 	std::wstring Info::getDirectory() {
 		return mDirectory;
+	}
+
+	std::wstring Info::getSteamDirectory() {
+		return mSteamDirectory;
 	}
 
 	std::wstring Info::getConfigFileName() {

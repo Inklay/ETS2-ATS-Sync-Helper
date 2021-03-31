@@ -6,22 +6,32 @@
 #include <wx/filename.h>
 
 wxDEFINE_EVENT(EVT_CONFIG_DIR_CHANGED, wxCommandEvent);
+wxDEFINE_EVENT(EVT_STEAM_DIR_CHANGED, wxCommandEvent);
 
 GameSettingsPanel::GameSettingsPanel(wxWindow * parent, wxWindowID id)
-	: Ets2StaticBox(parent, id, L"Game Settings") {
+	: Ets2StaticBox(parent, id, L"Game Settings")
+{
 	mConfigDirOptionsMenu = new wxMenu();
-
-	mConfigDirOptionOpen = new wxMenuItem(mConfigDirOptionsMenu, MENU_ID_CONFIG_DIR_OPEN, L"View folder");
+	mConfigDirOptionOpen = new wxMenuItem(mConfigDirOptionsMenu, MENU_ID_DIR_OPEN, L"View folder");
 	mConfigDirOptionsMenu->Append(mConfigDirOptionOpen);
-	mConfigDirOptionOpenFile = new wxMenuItem(mConfigDirOptionsMenu, MENU_ID_CONFIG_DIR_OPEN_FILE, L"Open game config file");
+	mConfigDirOptionOpenFile = new wxMenuItem(mConfigDirOptionsMenu, MENU_ID_DIR_OPEN_FILE, L"Open game config file");
 	mConfigDirOptionsMenu->Append(mConfigDirOptionOpenFile);
 	mConfigDirOptionsMenu->AppendSeparator();
-	mConfigDirOptionsMenu->Append(MENU_ID_CONFIG_DIR_CHANGE, L"Change…");
-	mConfigDirOptionsMenu->Append(MENU_ID_CONFIG_DIR_CHECK_AGAIN, L"Check again");
-	mConfigDirOptionDefault = new wxMenuItem(mConfigDirOptionsMenu, MENU_ID_CONFIG_DIR_DEFAULT, L"Set to default");
+	mConfigDirOptionsMenu->Append(MENU_ID_DIR_CHANGE, L"Change…");
+	mConfigDirOptionsMenu->Append(MENU_ID_DIR_CHECK_AGAIN, L"Check again");
+	mConfigDirOptionDefault = new wxMenuItem(mConfigDirOptionsMenu, MENU_ID_DIR_DEFAULT, L"Set to default");
 	mConfigDirOptionsMenu->Append(mConfigDirOptionDefault);
-
 	mConfigDirOptionsMenu->Bind(wxEVT_MENU, &GameSettingsPanel::onConfigDirOptionSelected, this);
+
+	mSteamDirOptionsMenu = new wxMenu();
+	mSteamDirOptionOpen = new wxMenuItem(mSteamDirOptionsMenu, MENU_ID_DIR_OPEN, L"View folder");
+	mSteamDirOptionsMenu->Append(mSteamDirOptionOpen);
+	mSteamDirOptionsMenu->AppendSeparator();
+	mSteamDirOptionsMenu->Append(MENU_ID_DIR_CHANGE, L"Change…");
+	mSteamDirOptionsMenu->Append(MENU_ID_DIR_CHECK_AGAIN, L"Check again");
+	mSteamDirOptionDefault = new wxMenuItem(mSteamDirOptionsMenu, MENU_ID_DIR_DEFAULT, L"Set to default");
+	mSteamDirOptionsMenu->Append(mSteamDirOptionDefault);
+	mSteamDirOptionsMenu->Bind(wxEVT_MENU, &GameSettingsPanel::onSteamDirOptionSelected, this);
 
 	wxPoint spacer(wxDLG_UNIT(this, wxPoint(4, 4)));
 
@@ -54,11 +64,27 @@ GameSettingsPanel::GameSettingsPanel(wxWindow * parent, wxWindowID id)
 	mConfigDirSeparator = new wxStaticText(this, wxID_ANY, L" - ");
 	mConfigDirOptionsButton = new wxHyperlinkCtrl(this, wxID_ANY, L"Options", wxEmptyString);
 	mConfigDirOptionsButton->SetMinSize(mConfigDirOptionsButton->GetClientSize());
-	mConfigDirOptionsButton->Bind(wxEVT_HYPERLINK, [this](wxCommandEvent&) { onConfigDirOptions(); });
+	mConfigDirOptionsButton->Bind(wxEVT_HYPERLINK, [this](wxCommandEvent&) { onDirOptions(DirId::CONFIG); });
 
 	mConfigDirSizer->Add(mConfigDirText, wxSizerFlags().CenterVertical());
 	mConfigDirSizer->Add(mConfigDirSeparator, wxSizerFlags().CenterVertical());
 	mConfigDirSizer->Add(mConfigDirOptionsButton, wxSizerFlags().CenterVertical());
+
+	// Steam Folder
+	mainSizer->Add(new wxStaticText(this, wxID_ANY, L"Steam Folder:", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT), wxSizerFlags().CenterVertical().Expand());
+
+	mSteamDirSizer = new wxBoxSizer(wxHORIZONTAL);
+	mainSizer->Add(mSteamDirSizer, wxSizerFlags().Expand());
+
+	mSteamDirText = new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_MIDDLE);
+	mSteamDirSeparator = new wxStaticText(this, wxID_ANY, L" - ");
+	mSteamDirOptionsButton = new wxHyperlinkCtrl(this, wxID_ANY, L"Options", wxEmptyString);
+	mSteamDirOptionsButton->SetMinSize(mSteamDirOptionsButton->GetClientSize());
+	mSteamDirOptionsButton->Bind(wxEVT_HYPERLINK, [this](wxCommandEvent&) { onDirOptions(DirId::STEAM); });
+
+	mSteamDirSizer->Add(mSteamDirText, wxSizerFlags().CenterVertical());
+	mSteamDirSizer->Add(mSteamDirSeparator, wxSizerFlags().CenterVertical());
+	mSteamDirSizer->Add(mSteamDirOptionsButton, wxSizerFlags().CenterVertical());
 
 	// Save Format
 	mainSizer->Add(new wxStaticText(this, wxID_ANY, L"Save Format:", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT), wxSizerFlags().CenterVertical().Expand());
@@ -103,44 +129,66 @@ void GameSettingsPanel::setGame(Ets2::Game game, bool sendEvent) {
 		mGameEts2->SetValue(true);
 	}
 	if (sendEvent) {
-		setConfigDirText(Ets2::Info::getDefaultDirectory(game));
+		setDirText(Ets2::Info::getDefaultDirectory(game), DirId::CONFIG);
 		QueueEvent(new wxCommandEvent(EVT_CONFIG_DIR_CHANGED, GetId()));
 	}
 }
 
-void GameSettingsPanel::onConfigDirOptions() {
-	wxPoint position = mConfigDirOptionsButton->GetPosition();
-	PopupMenu(mConfigDirOptionsMenu, position.x, position.y + mConfigDirOptionsButton->GetSize().y);
+void GameSettingsPanel::onDirOptions(DirId dirId) {
+	if (dirId == DirId::CONFIG)
+	{
+		wxPoint position = mConfigDirOptionsButton->GetPosition();
+		PopupMenu(mConfigDirOptionsMenu, position.x, position.y + mConfigDirOptionsButton->GetSize().y);
+	}
+	else if (dirId == DirId::STEAM)
+	{
+		wxPoint position = mSteamDirOptionsButton->GetPosition();
+		PopupMenu(mSteamDirOptionsMenu, position.x, position.y + mSteamDirOptionsButton->GetSize().y);
+	}
 }
 
-void GameSettingsPanel::onConfigDirOptionSelected(wxCommandEvent& event) {
-	wxString dir;
+wxString GameSettingsPanel::onDirOptionsSelected(wxCommandEvent& event, DirId dirId, wxString text, wxString default, wxString label, wxString baseText)
+{
+	wxString dir = baseText;
 	switch (event.GetId()) {
-	case MENU_ID_CONFIG_DIR_OPEN:
-		wxLaunchDefaultApplication(getDirectory());
-		return;
-	case MENU_ID_CONFIG_DIR_OPEN_FILE:
-		wxLaunchDefaultApplication(getEts2Info()->getConfigFileName());
-		return;
-	case MENU_ID_CONFIG_DIR_DEFAULT:
-		dir = Ets2::Info::getDefaultDirectory(getGame());
-		break;
-	case MENU_ID_CONFIG_DIR_CHECK_AGAIN:
-		dir = mConfigDirText->GetLabel();
-		break;
-	case MENU_ID_CONFIG_DIR_CHANGE:
-		wxDirDialog dlg(this, L"Select the Game Settings folder", getDirectory(), wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
-		if (dlg.ShowModal() == wxID_OK) {
-			dir = dlg.GetPath();
-		} else {
-			return;
-		}
-		break;
+		case MENU_ID_DIR_OPEN:
+			wxLaunchDefaultApplication(getDirectory(dirId));
+			break;
+		case MENU_ID_DIR_OPEN_FILE:
+			wxLaunchDefaultApplication(getEts2Info()->getConfigFileName());
+			break;
+		case MENU_ID_DIR_DEFAULT:
+			dir = default;
+			break;
+		case MENU_ID_DIR_CHECK_AGAIN:
+			dir = label;
+			break;
+		case MENU_ID_DIR_CHANGE:
+			wxDirDialog dlg(this, text, getDirectory(dirId), wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
+			if (dlg.ShowModal() == wxID_OK) {
+				dir = dlg.GetPath();
+			}
+			else
+			{
+				return L"";
+			}
+			break;
 	}
-	/*mConfigDirText->SetLabel(dir);
-	mConfigDirText->SetMaxSize(wxSize(mConfigDirSizer->GetSize().x - mConfigDirOptionsButton->GetSize().x - mConfigDirSeparator->GetSize().x, -1));*/
-	setConfigDirText(dir);
+	return dir;
+}
+
+void GameSettingsPanel::onConfigDirOptionSelected(wxCommandEvent& event)
+{
+	wxString dir = onDirOptionsSelected(event, DirId::CONFIG, L"Select the Game Settings folder", Ets2::Info::getDefaultDirectory(getGame()), mConfigDirText->GetLabel(), getDirectory(DirId::CONFIG));
+	setDirText(dir, DirId::CONFIG);
 	QueueEvent(new wxCommandEvent(EVT_CONFIG_DIR_CHANGED, GetId()));
+}
+
+void GameSettingsPanel::onSteamDirOptionSelected(wxCommandEvent& event)
+{
+	wxString dir = onDirOptionsSelected(event, DirId::STEAM, L"Select your Steam installation folder", Ets2::Info::getDefaultDirectory(getGame(), true), mSteamDirText->GetLabel(), getDirectory(DirId::STEAM));
+	setDirText(dir, DirId::STEAM);
+	QueueEvent(new wxCommandEvent(EVT_STEAM_DIR_CHANGED, GetId()));
 }
 
 void GameSettingsPanel::updateFromEts2Info() {
@@ -151,15 +199,28 @@ void GameSettingsPanel::updateFromEts2Info() {
 	mConfigDirOptionOpen->Enable(dir.Exists());
 	mConfigDirOptionOpenFile->Enable(ets2Info->isValid());
 	mConfigDirOptionDefault->Enable(!isDefaultDir);
-	MenuId id = MENU_ID_CONFIG_DIR_OPEN;
+	MenuId id = MENU_ID_DIR_OPEN;
 	if (!ets2Info->isValid()) {
-		id = isDefaultDir ? MENU_ID_CONFIG_DIR_CHANGE : MENU_ID_CONFIG_DIR_DEFAULT;
+		id = isDefaultDir ? MENU_ID_DIR_CHANGE : MENU_ID_DIR_DEFAULT;
 	}
 	SetMenuDefaultItem((HMENU)mConfigDirOptionsMenu->GetHMenu(), id, FALSE);
-
 	if (mConfigDirText->GetLabel() != ets2Info->getDirectory()) {
-		setConfigDirText(ets2Info->getDirectory());
+		setDirText(ets2Info->getDirectory(), DirId::CONFIG);
 	}
+
+	dir = wxFileName::DirName(ets2Info->getSteamDirectory());
+	isDefaultDir = dir.SameAs(wxFileName::DirName(Ets2::Info::getDefaultDirectory(getGame(), true)));
+	mSteamDirOptionOpen->Enable(dir.Exists());
+	mSteamDirOptionDefault->Enable(!isDefaultDir);
+	id = MENU_ID_DIR_OPEN;
+	if (!ets2Info->isValid()) {
+		id = isDefaultDir ? MENU_ID_DIR_CHANGE : MENU_ID_DIR_DEFAULT;
+	}
+	SetMenuDefaultItem((HMENU)mSteamDirOptionsMenu->GetHMenu(), id, FALSE);
+	if (mSteamDirText->GetLabel() != ets2Info->getDirectory()) {
+		setDirText(ets2Info->getSteamDirectory(), DirId::STEAM);
+	}
+
 	if (ets2Info->isValid()) {
 		//if (ets2Info->getSaveFormat() == Ets2::Info::SaveFormat::BINARY) {
 		if (ets2Info->getSaveFormat() == Ets2::Info::SaveFormat::TEXT) {
@@ -206,18 +267,45 @@ void GameSettingsPanel::updateFromEts2Info() {
 	}
 }
 
-wxString GameSettingsPanel::getDirectory() {
-	return mConfigDirText->GetLabel();
+wxString GameSettingsPanel::getDirectory(DirId dirId)
+{
+	switch (dirId)
+	{
+		case DirId::STEAM:
+			return mSteamDirText->GetLabel();
+		default:
+		case DirId::CONFIG:
+			return mConfigDirText->GetLabel();
+	}
 }
 
-void GameSettingsPanel::setConfigDirText(const wxString& text) {
-	mConfigDirText->SetLabel(text);
-	int maxWidth = mConfigDirSizer->GetSize().x - mConfigDirOptionsButton->GetSize().x - mConfigDirSeparator->GetSize().x;
-	if (mConfigDirText->GetSize().x > maxWidth) {
-		mConfigDirText->SetToolTip(text);
-	} else {
-		mConfigDirText->SetToolTip(L"");
+void GameSettingsPanel::setDirText(const wxString& text, DirId dirId) {
+	wxStaticText* dirText;
+	wxBoxSizer* dirSizer;
+	wxHyperlinkCtrl* dirOptionsButton;
+	wxStaticText* dirSeparator;
+
+	if (dirId == DirId::CONFIG)
+	{
+		dirText = mConfigDirText;
+		dirSizer = mConfigDirSizer;
+		dirOptionsButton = mConfigDirOptionsButton;
+		dirSeparator = mConfigDirSeparator;
 	}
-	mConfigDirText->SetMaxSize(wxSize(maxWidth, -1));
+	else
+	{
+		dirText = mSteamDirText;
+		dirSizer = mSteamDirSizer;
+		dirOptionsButton = mSteamDirOptionsButton;
+		dirSeparator = mSteamDirSeparator;
+	}
+	dirText->SetLabel(text);
+	int maxWidth = dirSizer->GetSize().x - dirOptionsButton->GetSize().x - dirSeparator->GetSize().x;
+	if (dirText->GetSize().x > maxWidth) {
+		dirText->SetToolTip(text);
+	} else {
+		dirText->SetToolTip(L"");
+	}
+	dirText->SetMaxSize(wxSize(maxWidth, -1));
 	Layout();
 }
