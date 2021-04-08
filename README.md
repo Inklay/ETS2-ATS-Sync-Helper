@@ -1,6 +1,6 @@
 # ETS2&ATS Sync Helper
 
-## ETS2 support: version 1.39 and all DLCs.
+## ETS2 support: version 1.39 and all DLCs except Iberia.
 ## ATS support: version 1.39 and all DLCS.
 
 * [Version française](README-fr.md)
