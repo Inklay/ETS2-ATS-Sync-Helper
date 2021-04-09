@@ -51,7 +51,7 @@ DlcSelector::DlcSelector(wxWindow * parent, wxWindowID id)
 
 	cb = new wxCheckBox(this, wxID_ANY, "Iberia");
 	vec->push_back(cb);
-	mDlcByCheckbox[cb] = L"?";
+	mDlcByCheckbox[cb] = L"iberia";
 
 	cb = new wxCheckBox(this, wxID_ANY, "Heart of Russia");
 	vec->push_back(cb);

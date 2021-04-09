@@ -71,9 +71,8 @@ GameSettingsPanel::GameSettingsPanel(wxWindow * parent, wxWindowID id)
 	mConfigDirSizer->Add(mConfigDirOptionsButton, wxSizerFlags().CenterVertical());
 
 	// Steam Folder
-	mainSizer->Add(new wxStaticText(this, wxID_ANY, L"Steam Folder:", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT), wxSizerFlags().CenterVertical().Expand());
-
 	mSteamDirSizer = new wxBoxSizer(wxHORIZONTAL);
+	mainSizer->Add(new wxStaticText(this, wxID_ANY, L"Steam Folder:", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT), wxSizerFlags().CenterVertical().Expand());
 	mainSizer->Add(mSteamDirSizer, wxSizerFlags().Expand());
 
 	mSteamDirText = new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_MIDDLE);
