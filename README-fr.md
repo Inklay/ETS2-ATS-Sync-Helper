@@ -1,7 +1,9 @@
 # ETS2&ATS Sync Helper
 
-## Support d'ETS2: version 1.39 et tous les DLCs sauf Iberia.
-## Support d'ATS: version 1.39 et tous les DLCs.
+![ETS2 Version](https://img.shields.io/badge/ETS2%20Version-1.39%20%2B-green)
+![ETS2 DLC](https://img.shields.io/badge/ETS%20DLC-ALL-yellowgreen)
+![ATS Version](https://img.shields.io/badge/ATS%20Version-1.39%20%2B-green)
+![ATS DLC](https://img.shields.io/badge/ATS%20DLC-ALL-yellowgreen)
 * [English version](README.md)
 
 [LICENSE](LICENSE.md)
